@@ -77,7 +77,7 @@ function create_app(qb, options, types) {
 
   app
     .use(base + '/test', testEndpoint)
-    .use(base, getTypeCallback(types))
+    .use(base, getTypeCallback(base, types))
     .use(base, pushEndpoint(qb));
 
   return app
@@ -110,19 +110,26 @@ function verifyBaseUrl(base) {
   }
 }
 
-function getTypeCallback(types) {
-  return function (req, res, next) {
-    var split = req.path.split('/').slice(1),
-      type = split[0],
-      rest = '/' + split.slice(1).join('/');
+// Figures out if this is an available path
+function getTypeCallback(base, types) {
 
-    if (types[type]) {
-      req.path = rest;
-      req.type = type;
-      return next();
+  return function (req, res, next) {
+    // FIXME: v2/ is here for deprecated d2 apis
+    var regex = new RegExp('^(?:/v2)?/(' + Object.keys(types).join('|') + ')')
+
+    var m = req.url.match(regex)
+      , type = m && m[1]
+
+    if (!type) {
+      return res.send(404, {error: 'url not understood'})
+    } else if (!types[type]) {
+      return res.send(404, {error: 'this service cannot perform tasks of type ' + type});
+    } else if (req.method !== 'POST') {
+      return res.send(404, {error: 'post required'})
     }
 
-    res.send(404, {error: 'type ' + type + ' not used on this qb endpoint'});
+    req.type = type
+    next()
   }
 }
 
