@@ -55,6 +55,7 @@ function create_app(qb, options, types) {
     port = options.port,
     app = options.app || express()
       .use(express.logger())
+      .use(express.query())
       .use(express.json())
       .use(express.urlencoded()),
     hasApp = Boolean(options.app);
