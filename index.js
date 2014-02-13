@@ -22,7 +22,10 @@ function HttpDialect(qb, options) {
   this.ended = false;
 
   if (!options.app && options.port) {
+    qb.log.info('Starting http qb api server at :%d%s', options.port, options.base||'')
     this.server = this.app.listen(options.port)
+  } else {
+    qb.log.info('http qb api server not started but ready to go at %s', options.base||'')
   }
 }
 
@@ -56,7 +59,6 @@ function startup(qb, options) {
 
 function create_app(qb, options, types) {
   var base = options.base || '',
-    port = options.port,
     app = options.app || express()
       .use(express.logger())
       .use(express.query())
@@ -64,11 +66,6 @@ function create_app(qb, options, types) {
       .use(express.urlencoded()),
     hasApp = Boolean(options.app);
 
-  if (hasApp) {
-    qb.log.info('Staring http qb api server on existing app at %s', base)
-  } else {
-    qb.log.info('Starting http qb api server at :%d%s', port, base)
-  }
 
   if (options.auth) {
     qb.log.info('Using basic auth in http.')
