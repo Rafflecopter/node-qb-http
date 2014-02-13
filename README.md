@@ -33,6 +33,8 @@ Options:
 - `base` Base api prefix
 - `retry` Number of retries before quitting a push call.
 
+To access the underlying express server, use `qb.dialect('http').app`.
+
 ## License
 
 MIT in LICENSE file
