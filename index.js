@@ -20,6 +20,10 @@ function HttpDialect(qb, options) {
   this.types = {};
   this.app = create_app(qb, options, this.types);
   this.ended = false;
+
+  if (!options.app && options.port) {
+    this.server = this.app.listen(options.port)
+  }
 }
 
 HttpDialect.prototype.can = function() {
@@ -39,8 +43,8 @@ HttpDialect.prototype.push = function (endpoint, type, task, callback) {
 
 HttpDialect.prototype.end = function (cb) {
   this.ended = true;
-  if (this.app) {
-    this.app.close(cb)
+  if (this.server) {
+    this.server.close(cb)
   }
   else
     cb();
@@ -66,9 +70,6 @@ function create_app(qb, options, types) {
     qb.log.info('Starting http qb api server at :%d%s', port, base)
   }
 
-  // If no port is given, we assume they don't want to listen
-  if (!hasApp && !port) return null;
-
   if (options.auth) {
     qb.log.info('Using basic auth in http.')
     app.use(base, express.basicAuth(options.auth.user, options.auth.pass));
@@ -77,10 +78,7 @@ function create_app(qb, options, types) {
   app.use(base, getTypeCallback(types))
     .use(base, pushEndpoint(qb));
 
-  if (!hasApp) {
-    return app.listen(port);
-  }
-  return null;
+  return app
 }
 
 function make_request(endpoint, type, task, nretries, auth, callback) {
