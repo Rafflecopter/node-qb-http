@@ -75,7 +75,9 @@ function create_app(qb, options, types) {
     app.use(base, express.basicAuth(options.auth.user, options.auth.pass));
   }
 
-  app.use(base, getTypeCallback(types))
+  app
+    .use(base + '/test', testEndpoint)
+    .use(base, getTypeCallback(types))
     .use(base, pushEndpoint(qb));
 
   return app
@@ -135,4 +137,8 @@ function pushEndpoint(qb) {
       }
     });
   }
+}
+
+function testEndpoint(req, res) {
+  res.send(200)
 }
