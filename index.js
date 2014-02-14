@@ -1,6 +1,9 @@
 // dialects/http.js
 // Provide service endpoints for pushing to services in qb
 
+// builtin
+var url = require('url');
+
 // vendor
 var _ = require('underscore'),
   express = require('express'),
@@ -60,7 +63,7 @@ function startup(qb, options) {
 function create_app(qb, options, types) {
   var base = options.base || '',
     app = options.app || express()
-      .use(express.logger())
+      .use(logger(qb))
       .use(express.query())
       .use(express.json())
       .use(express.urlencoded()),
@@ -145,4 +148,30 @@ function pushEndpoint(qb) {
 
 function testEndpoint(req, res) {
   res.send(200)
+}
+
+function logger(qb) {
+  return function (req, res, next) {
+    req._startTime = new Date()
+    var url = req.url
+    var end = res.end
+    res.end = function () {
+      res.end = end
+      res.end.apply(res, arguments)
+
+      log()
+    }
+
+    function log() {
+      out = []
+      out.push('[' + new Date().toString() + ']')
+      out.push(res.statusCode)
+      out.push(req.method.toUpperCase())
+      out.push(url)
+      out.push('(' + (new Date() - req._startTime))
+      out.push('ms)')
+      qb.log.debug(out.join(' '))
+    }
+    next()
+  }
 }
