@@ -80,6 +80,12 @@ function create_app(qb, options, types) {
     .use(base, getTypeCallback(base, types))
     .use(base, pushEndpoint(qb));
 
+  if (qb._options.allow_defer) {
+    app.use(base, deleteEndpoint(qb));
+  }
+
+  app.use(base, error404);
+
   return app
 }
 
@@ -115,7 +121,7 @@ function getTypeCallback(base, types) {
 
   return function (req, res, next) {
     // FIXME: v2/ is here for deprecated d2 apis
-    var regex = new RegExp('^(?:/v2)?/(' + Object.keys(types).join('|') + ')')
+    var regex = new RegExp('^(?:/v2)?/(' + Object.keys(types).join('|') + ')(?:/(.*))?')
 
     var m = req.url.match(regex)
       , type = m && m[1]
@@ -124,17 +130,20 @@ function getTypeCallback(base, types) {
       return res.send(404, {error: 'url not understood'})
     } else if (!types[type]) {
       return res.send(404, {error: 'this service cannot perform tasks of type ' + type});
-    } else if (req.method !== 'POST') {
-      return res.send(404, {error: 'post required'})
     }
 
     req.type = type
+    req.rest = m && m[2]
     next()
   }
 }
 
 function pushEndpoint(qb) {
-  return function (req, res) {
+  return function (req, res, next) {
+    if (req.method !== 'POST') {
+      return next()
+    }
+
     var type = req.type;
     qb.push(type, req.body, function (err) {
       if (err) {
@@ -146,8 +155,31 @@ function pushEndpoint(qb) {
   }
 }
 
+function deleteEndpoint(qb) {
+  return function (req, res, next) {
+    if (req.method !== 'DELETE') {
+      return next()
+    }
+
+    var type = req.type
+      , id = req.rest;
+
+    qb.queue(type).undefer_remove(id, function (err) {
+      if (err) {
+        res.send(500, {error: err.message, stack: err.stack});
+      } else {
+        res.send({ok:true, type:type});
+      }
+    });
+  }
+}
+
 function testEndpoint(req, res) {
   res.send(200)
+}
+
+function error404(req, res) {
+  res.send(404, {error: 'not found'})
 }
 
 function logger(qb) {

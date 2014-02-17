@@ -25,6 +25,6 @@
     "express": "~3.4.8"
   },
   "devDependencies": {
-    "qb": "~0.5.1"
+    "qb": "~0.5.6"
   }
 }
