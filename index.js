@@ -120,8 +120,7 @@ function verifyBaseUrl(base) {
 function getTypeCallback(base, types) {
 
   return function (req, res, next) {
-    // FIXME: v2/ is here for deprecated d2 apis
-    var regex = new RegExp('^(?:/v2)?/(' + Object.keys(types).join('|') + ')(?:/(.*))?')
+    var regex = new RegExp('^/(' + Object.keys(types).join('|') + ')(?:/(.*))?')
 
     var m = req.url.match(regex)
       , type = m && m[1]
