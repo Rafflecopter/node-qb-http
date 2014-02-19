@@ -120,7 +120,7 @@ function verifyBaseUrl(base) {
 function getTypeCallback(base, types) {
 
   return function (req, res, next) {
-    var regex = new RegExp('^/(' + Object.keys(types).join('|') + ')(?:/(.*))?')
+    var regex = new RegExp('^/(' + Object.keys(types).join('|') + ')(?:/(.*))?$')
 
     var m = req.url.match(regex)
       , type = m && m[1]

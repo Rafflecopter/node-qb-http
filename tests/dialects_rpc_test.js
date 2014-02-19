@@ -80,6 +80,20 @@ function createTests(dialectName, dialect, options, endpoint) {
       .push('cnt', {i: j++}, test.ifError)
       .push('cnt', [{i: j++}, {i: j++}], test.ifError);
   }
+
+  tests.badtask = function badtask(test) {
+    qb.speaks(dialect, options)
+      .on('error', test.done)
+      .can('something', function (task, done) {
+        test.done(new Error('not supposed to be here'))
+      })
+      .start()
+
+    qb.contact(endpoint).push('something-plus', {'other': 'else'}, function (err) {
+      test.ok(err)
+      test.done()
+    })
+  }
 }
 
 exports.http.passed_in_app = function passed_in_app(test) {
