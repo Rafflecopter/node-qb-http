@@ -78,8 +78,7 @@ function createTests(dialectName, dialect, options, endpoint) {
 
     qb.contact('alias')
       .push('cnt', {i: j++}, test.ifError)
-      .push('cnt', {i: j++}, test.ifError)
-      .push('cnt', {i: j++}, test.ifError);
+      .push('cnt', [{i: j++}, {i: j++}], test.ifError);
   }
 }
 

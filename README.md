@@ -17,12 +17,21 @@ qb.speaks(require('qb-http'), { port: 8000, base: '/qb-api' })
   // Access a contact using http
   .contact('http://some.other.server.com/qb')
     // Push a task on to their 'service-name' queue
-    .push('service-name', {task:'task',desc:'ription'});
+    .push('service-name', {task:'task',desc:'ription'})
+    // Or push multiple tasks at once!
+    .push('service-name', [task1, task2], callback /* and use a callback */ );
 
 // Or you can create an alias
 qb.contacts('http://some.other.server.com/qb', 'my-other-server')
   .contact('my-other-server').push('other-service', {task:'4',you:'!'});
 ```
+
+Also, here's the curl api:
+
+```
+$ curl http://server.domain.tld/api/service-name -XPOST -H'Content-Type: application/json' -d'{"task": "data"}'
+```
+
 
 The `.speaks.start` starts up a simple express server, while the `.contact('http://...').push` uses request to communicate with another qb instance.
 

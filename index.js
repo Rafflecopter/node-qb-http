@@ -143,14 +143,18 @@ function pushEndpoint(qb) {
       return next()
     }
 
-    var type = req.type;
-    qb.push(type, req.body, function (err) {
-      if (err) {
-        res.send(500, {error: err.message, stack: err.stack});
-      } else {
-        res.send({ok:true, type:type});
-      }
-    });
+    var type = req.type
+      , body = _.isArray(req.body) ? req.body : [req.body];
+
+    _.each(body, function (task) {
+      qb.push(type, task, function (err) {
+        if (err) {
+          res.send(500, {error: err.message, stack: err.stack});
+        } else {
+          res.send({ok:true, type:type});
+        }
+      });
+    })
   }
 }
 
