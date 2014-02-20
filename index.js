@@ -80,7 +80,7 @@ function create_app(qb, options, types) {
     .use(base, getTypeCallback(base, types))
     .use(base, pushEndpoint(qb));
 
-  if (qb._options.allow_defer) {
+  if (options.allow_defer) {
     app.use(base, deleteEndpoint(qb));
   }
 
