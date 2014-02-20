@@ -84,7 +84,9 @@ function create_app(qb, options, types) {
     app.use(base, deleteEndpoint(qb));
   }
 
-  app.use(base, error404);
+  if (!options.dont_use_404_catch) {
+    app.use(base, error404);
+  }
 
   return app
 }
