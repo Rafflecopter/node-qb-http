@@ -169,7 +169,7 @@ function deleteEndpoint(qb) {
     var type = req.type
       , id = req.rest;
 
-    qb.queue(type).undefer_remove(id, function (err) {
+    qb.undefer_remove(queue, id, function (err) {
       if (err) {
         res.send(500, {error: err.message, stack: err.stack});
       } else {
