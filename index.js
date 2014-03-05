@@ -230,9 +230,13 @@ function connectToUnixSocket(qb, app, path) {
       var clientSocket = new net.Socket();
       clientSocket.on('error', function(e) { // handle error trying to talk to server
         if (e.code == 'ECONNREFUSED') {  // No other server listening
-          fs.unlink(path);
-          server.listen(path, function() { //'listening' listener
-            qb.log.info('Server recovered from EADDRINUSE for unix socket.')
+          fs.unlink(path, function (err) {
+            if (err) {
+              return qb.emit('error', err)
+            }
+            server.listen(path, function() { //'listening' listener
+              qb.log.info('Server recovered from EADDRINUSE for unix socket.')
+            });
           });
         }
       });
