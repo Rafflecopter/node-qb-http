@@ -2,7 +2,9 @@
 // Provide service endpoints for pushing to services in qb
 
 // builtin
-var url = require('url');
+var url = require('url')
+  , net = require('net')
+  , fs = require('fs');
 
 // vendor
 var _ = require('underscore'),
@@ -26,7 +28,11 @@ function HttpDialect(qb, options) {
 
   if (!options.app && (options.port || options.unix)) {
     qb.log.info('Starting http qb api server at %s %s', options.port ? ':' + options.port : 'unix://' + options.unix, options.base||'')
-    this.server = this.app.listen(options.port || options.unix)
+    if (options.port) {
+      this.server = this.app.listen(options.port)
+    } else {
+      this.server = connectToUnixSocket(qb, this.app, options.unix)
+    }
   } else {
     qb.log.info('http qb api server not started but ready to go at %s', options.base||'')
   }
@@ -211,4 +217,33 @@ function logger(qb) {
     }
     next()
   }
+}
+
+function connectToUnixSocket(qb, app, path) {
+  var server = app.listen(path)
+
+  server.on('error', function (e) {
+    if (e.code == 'EADDRINUSE') {
+      // If we get addrinuse for a unix socket, we can try and connect to the socket
+      // If we can connect, another service has taken our socket!
+      // Otherwise, we can delete and re-listen
+      var clientSocket = new net.Socket();
+      clientSocket.on('error', function(e) { // handle error trying to talk to server
+        if (e.code == 'ECONNREFUSED') {  // No other server listening
+          fs.unlink(path);
+          server.listen(path, function() { //'listening' listener
+            qb.log.info('Server recovered from EADDRINUSE for unix socket.')
+          });
+        }
+      });
+      clientSocket.connect({path: path}, function() {
+        qb.log.panic('Another server is running at unix socket location %s', path)
+        setTimeout(process.exit, 500);
+      });
+    } else {
+      qb.emit('error', e)
+    }
+  });
+
+  return server;
 }
