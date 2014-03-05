@@ -24,9 +24,9 @@ function HttpDialect(qb, options) {
   this.app = create_app(qb, options, this.types);
   this.ended = false;
 
-  if (!options.app && options.port) {
-    qb.log.info('Starting http qb api server at :%d%s', options.port, options.base||'')
-    this.server = this.app.listen(options.port)
+  if (!options.app && (options.port || options.unix)) {
+    qb.log.info('Starting http qb api server at %s %s', options.port ? ':' + options.port : 'unix://' + options.unix, options.base||'')
+    this.server = this.app.listen(options.port || options.unix)
   } else {
     qb.log.info('http qb api server not started but ready to go at %s', options.base||'')
   }
