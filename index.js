@@ -234,9 +234,7 @@ function connectToUnixSocket(qb, app, path) {
             if (err) {
               return qb.emit('error', err)
             }
-            server.listen(path, function() { //'listening' listener
-              qb.log.info('Server recovered from EADDRINUSE for unix socket.')
-            });
+            server.listen(path);
           });
         }
       });
@@ -248,6 +246,20 @@ function connectToUnixSocket(qb, app, path) {
       qb.emit('error', e)
     }
   });
+
+  server.on('listening', function (err) {
+    if (err) {
+      qb.emit('error', err)
+    } else {
+      fs.chmod(path, 0777, function (err) {
+        if (err) {
+          qb.emit('error', err)
+        } else {
+          qb.log.info('Unix socket opened and set to 777.')
+        }
+      })
+    }
+  })
 
   return server;
 }
