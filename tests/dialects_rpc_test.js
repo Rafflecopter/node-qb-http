@@ -94,6 +94,26 @@ function createTests(dialectName, dialect, options, endpoint) {
       test.done()
     })
   }
+
+  tests.onaction = function onaction(test) {
+    test.expect(1);
+    var myoptions = _.clone(options)
+    myoptions.onaction = function (req, res, err) {
+      res.send(500, 'ALWAYSERR')
+    }
+
+    qb.speaks(dialect, myoptions)
+      .on('error', test.done)
+      .can('something', function (task, done) {
+        done()
+      })
+      .start()
+
+    qb.contact(endpoint).push('something', {}, function (err) {
+      test.ok(/ALWAYSERR/.test(err.toString()))
+      test.done()
+    })
+  }
 }
 
 exports.http.passed_in_app = function passed_in_app(test) {

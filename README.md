@@ -41,6 +41,7 @@ Options:
 - `app` Allows one to pass in an express app of their choosing.
 - `base` Base api prefix
 - `retry` Number of retries before quitting a push call.
+- `onaction(req, res, err)` a method that is called after each push and delete action goes through the api. optional
 
 To access the underlying express server, use `qb.dialect('http').app`.
 

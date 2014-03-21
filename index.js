@@ -84,10 +84,10 @@ function create_app(qb, options, types) {
   app
     .use(base + '/test', testEndpoint)
     .use(base, getTypeCallback(base, types))
-    .use(base, pushEndpoint(qb));
+    .use(base, pushEndpoint(qb, options.onaction || defaultOnAction));
 
   if (options.allow_defer) {
-    app.use(base, deleteEndpoint(qb));
+    app.use(base, deleteEndpoint(qb, options.onaction || defaultOnAction));
   }
 
   if (!options.dont_use_404_catch) {
@@ -145,7 +145,7 @@ function getTypeCallback(base, types) {
   }
 }
 
-function pushEndpoint(qb) {
+function pushEndpoint(qb, onaction) {
   return function (req, res, next) {
     if (req.method !== 'POST') {
       return next()
@@ -155,18 +155,13 @@ function pushEndpoint(qb) {
       , body = _.isArray(req.body) ? req.body : [req.body];
 
     _.each(body, function (task) {
-      qb.push(type, task, function (err) {
-        if (err) {
-          res.send(500, {error: err.message, stack: err.stack});
-        } else {
-          res.send({ok:true, type:type});
-        }
-      });
+      qb.push(type, task, onaction.bind(null, req, res))
     })
   }
+
 }
 
-function deleteEndpoint(qb) {
+function deleteEndpoint(qb, onerror) {
   return function (req, res, next) {
     if (req.method !== 'DELETE') {
       return next()
@@ -175,13 +170,7 @@ function deleteEndpoint(qb) {
     var type = req.type
       , id = req.rest;
 
-    qb.undefer_remove(queue, id, function (err) {
-      if (err) {
-        res.send(500, {error: err.message, stack: err.stack});
-      } else {
-        res.send({ok:true, type:type});
-      }
-    });
+    qb.undefer_remove(queue, id, onaction.bind(null, req, res));
   }
 }
 
@@ -191,6 +180,14 @@ function testEndpoint(req, res) {
 
 function error404(req, res) {
   res.send(404, {error: 'not found'})
+}
+
+function defaultOnAction(req, res, err) {
+  if (err) {
+    res.send(500, {error: err.message, stack: err.stack});
+  } else {
+    res.send({ok:true, type: req.type});
+  }
 }
 
 function logger(qb) {
