@@ -99,7 +99,7 @@ function createTests(dialectName, dialect, options, endpoint) {
     test.expect(1);
     var myoptions = _.clone(options)
     myoptions.onaction = function (req, res, err) {
-      res.send(500, 'ALWAYSERR')
+      res.jsonp(500, 'ALWAYSERR')
     }
 
     qb.speaks(dialect, myoptions)

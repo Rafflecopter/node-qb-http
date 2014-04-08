@@ -22,7 +22,8 @@
   "dependencies": {
     "underscore": "~1.5.2",
     "request": "~2.33.0",
-    "express": "~3.4.8"
+    "express": "~3.4.8",
+    "async": "~0.7.0"
   },
   "devDependencies": {
     "qb": "~0.5.11"

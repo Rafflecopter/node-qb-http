@@ -9,7 +9,8 @@ var url = require('url')
 // vendor
 var _ = require('underscore'),
   express = require('express'),
-  request = require('request');
+  request = require('request'),
+  async = require('async');
 
 module.exports = {
   name: 'http',
@@ -120,7 +121,7 @@ function verifyBaseUrl(base) {
     if (req.path.slice(0, base.length) === base) {
       return next();
     }
-    res.send(404, {error: 'all routes begin with ' + base});
+    res.jsonp(404, {error: 'all routes begin with ' + base});
   }
 }
 
@@ -134,9 +135,9 @@ function getTypeCallback(base, types) {
       , type = m && m[1]
 
     if (!type) {
-      return res.send(404, {error: 'url not understood'})
+      return res.jsonp(404, {error: 'url not understood'})
     } else if (!types[type]) {
-      return res.send(404, {error: 'this service cannot perform tasks of type ' + type});
+      return res.jsonp(404, {error: 'this service cannot perform tasks of type ' + type});
     }
 
     req.type = type
@@ -154,9 +155,9 @@ function pushEndpoint(qb, onaction) {
     var type = req.type
       , body = _.isArray(req.body) ? req.body : [req.body];
 
-    _.each(body, function (task) {
-      qb.push(type, task, onaction.bind(null, req, res))
-    })
+    async.each(_.values(body), function (task, cb) {
+      qb.push(type, task, cb)
+    }, onaction.bind(null, req, res))
   }
 
 }
@@ -175,18 +176,18 @@ function deleteEndpoint(qb, onerror) {
 }
 
 function testEndpoint(req, res) {
-  res.send(200)
+  res.jsonp(200)
 }
 
 function error404(req, res) {
-  res.send(404, {error: 'not found'})
+  res.jsonp(404, {error: 'not found'})
 }
 
 function defaultOnAction(req, res, err) {
   if (err) {
-    res.send(500, {error: err.message, stack: err.stack});
+    res.jsonp(500, {error: err.message, stack: err.stack});
   } else {
-    res.send({ok:true, type: req.type});
+    res.jsonp({ok:true, type: req.type});
   }
 }
 
