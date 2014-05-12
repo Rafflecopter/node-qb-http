@@ -24,18 +24,20 @@ function HttpDialect(qb, options) {
   this.auth = options.auth;
   this.retry = options.retry === undefined ? 0 : options.retry * 1;
   this.types = {};
-  this.app = create_app(qb, options, this.types);
+  this.app = options.pushonly ? null : create_app(qb, options, this.types);
   this.ended = false;
 
-  if (!options.app && (options.port || options.unix)) {
+  if (!options.pushonly && !options.app && (options.port || options.unix)) {
     qb.log.info('Starting http qb api server at %s %s', options.port ? ':' + options.port : 'unix://' + options.unix, options.base||'')
     if (options.port) {
       this.server = this.app.listen(options.port)
     } else {
       this.server = connectToUnixSocket(qb, this.app, options.unix)
     }
-  } else {
+  } else if (!options.pushonly) {
     qb.log.info('http qb api server not started but ready to go at %s', options.base||'')
+  } else {
+    qb.log.info('Using qb-http as push only')
   }
 }
 
