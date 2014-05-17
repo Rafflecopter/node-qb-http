@@ -53,7 +53,7 @@ HttpDialect.prototype.can = function() {
 HttpDialect.prototype.push = function (endpoint, type, task, callback) {
   if (this.ended)
     return callback(new Error('qb ended'))
-  make_request(endpoint, type, task, this.retry, this.auth, callback);
+  make_request(endpoint, type, task, this.retry, callback);
 }
 
 HttpDialect.prototype.end = function (cb) {
@@ -100,13 +100,12 @@ function create_app(qb, options, types) {
   return app
 }
 
-function make_request(endpoint, type, task, nretries, auth, callback) {
+function make_request(endpoint, type, task, nretries, callback) {
   // Here's a good way to do
   request({
     method: 'POST',
     uri: endpoint + '/' + type,
-    json: task,
-    auth: auth
+    json: task
   }, function (err, resp) {
     if (err && nretries > 0) {
       return make_request(endpoint, type, task, nretries - 1, callback);
