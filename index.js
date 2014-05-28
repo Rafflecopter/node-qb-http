@@ -110,7 +110,7 @@ function make_request(endpoint, type, task, nretries, callback) {
     if (err && nretries > 0) {
       return make_request(endpoint, type, task, nretries - 1, callback);
     } else if (!resp || resp.statusCode !== 200) {
-      err = new Error(JSON.stringify(resp ? resp.body : 'no response'));
+      err = new Error(JSON.stringify(resp ? resp.body : 'no response from ' + endpoint + '/' + type));
     }
     callback(err, resp);
   });
