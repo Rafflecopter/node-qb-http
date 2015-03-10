@@ -1,9 +1,9 @@
 // qb-http/index.js
 // A QB Component to provide push of requests via http
 
-var incoming = require('lib/incoming')
-  , outgoing = require('lib/outgoing')
+var receive = require('./lib/receive')
+  , push = require('./lib/push')
 
-// Setup either an incoming or outgoing http interface
-module.exports.incoming = incoming
-module.exports.outgoing = outgoing
+// Setup either an receive or push http interface
+module.exports.receive = receive
+module.exports.push = push
