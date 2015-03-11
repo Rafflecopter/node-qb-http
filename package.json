@@ -28,7 +28,7 @@
     "unix-listen": "0.1.1"
   },
   "devDependencies": {
-    "qb": "2.0.0-rc1",
+    "qb": "^2.0.0",
     "xtend": "4.0.0"
   }
 }
