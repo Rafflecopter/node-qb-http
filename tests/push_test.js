@@ -102,3 +102,13 @@ tests.push_retry = function (test) {
       setImmediate(test.done)
     })
 }
+
+
+tests.push_to_nowhere = function (test) {
+  test.expect(1)
+  qb.on('error', test.ifError)
+    .push('relyq://something:else', {}, function (err) {
+      test.ifError(err)
+      test.done()
+    })
+}
