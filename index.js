@@ -7,3 +7,5 @@ var receive = require('./lib/receive')
 // Setup either an receive or push http interface
 module.exports.receive = receive
 module.exports.push = push
+
+module.exports.logger = require('./lib/receive/logger-middleware')
